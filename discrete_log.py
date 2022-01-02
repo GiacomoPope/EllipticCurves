@@ -40,7 +40,7 @@ def normalise_queue(queue):
     P.z = 0 if P.z == 0 else 1
     return queue
 
-def bsgs(P, Q, n, upper_bound=None, batched=False):
+def bsgs(P, Q, n, upper_bound=None, batched=True):
     if upper_bound:
         m = ceil(sqrt(upper_bound))
     else:
@@ -54,7 +54,7 @@ def bsgs(P, Q, n, upper_bound=None, batched=False):
             for i in range(m):
                 queue.append((i, Pi))
                 Pi += P
-                if len(queue) == m or len(queue) >= 500:
+                if i+1 == m or len(queue) >= 500:
                     queue = normalise_queue(queue)
                     for j, Pj in queue:
                         bsgs.baby_steps[Pj] = j
@@ -170,7 +170,7 @@ def pohlig_hellman(P, Q, n, n_factors, dlog=bsgs):
             # Solve partial dlog
             dk = dlog(gamma, Qk, n, upper_bound=pi)
             if dk is None:
-                print(f"Discrete log failed for {gamma=}, {Qk=}, {pi=}")
+                print(f"Discrete log failed for {str(gamma)}, {str(Qk)}, {pi=}")
                 exit()
 
             # increment the secret
