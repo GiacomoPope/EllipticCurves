@@ -4,6 +4,14 @@ Implementation of elliptic curve arithematic for fun, and for use of plugging in
 
 ⚠️ Code is written to be fast rather than safe, so this is 100% not suitible for cryptographic implementations ⚠️
 
+## To-Do
+
+- Montgomery arithematic for fields
+- Batch normalisation for giant steps
+- Montgomery arithematic for curves, when suitible
+- Pairings (Which also means divisors)
+- More Benchmarks for point addion and scalar multiplication outside of dlog
+
 ## Discrete Logarithm Benchmarks
 
 ### Easy Challenge
