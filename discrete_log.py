@@ -34,7 +34,7 @@ def normalise_queue(queue):
         yield P
 
 
-def bsgs(P, Q, n, upper_bound=None):
+def bsgs(P, Q, n, upper_bound=None, batched=True):
     if upper_bound:
         m = ceil(sqrt(upper_bound))
     else:
@@ -167,9 +167,9 @@ def pohlig_hellman(P, Q, n, n_factors, dlog=bsgs):
 
             # Solve partial dlog
             dk = dlog(gamma, Qk, n, upper_bound=pi)
-            print(f"{dk}")
-            if not dk:
-                continue
+
+            if dk is None:
+                exit(f"Discrete log failed in bsgs step, for {str(gamma)}, {str(Qk)}, {pi=}")
 
             # increment the secret
             xi += dk*(pi**k)
