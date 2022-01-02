@@ -46,14 +46,7 @@ def bsgs(P, Q, n, upper_bound=None, batched=False):
     else:
         m = ceil(sqrt(n))
 
-    if not batched:
-        if not hasattr(bsgs, 'baby_steps'):
-            bsgs.baby_steps = dict()
-            Pi = P.curve.O
-            for i in range(m):
-                bsgs.baby_steps[Pi] = i
-                Pi += P
-    else:
+    if batched:
         if not hasattr(bsgs, 'baby_steps'):
             bsgs.baby_steps = dict()
             queue = []
@@ -66,6 +59,14 @@ def bsgs(P, Q, n, upper_bound=None, batched=False):
                     for j, Pj in queue:
                         bsgs.baby_steps[Pj] = j
                     queue = []
+    
+    else:
+        if not hasattr(bsgs, 'baby_steps'):
+            bsgs.baby_steps = dict()
+            Pi = P.curve.O
+            for i in range(m):
+                bsgs.baby_steps[Pi] = i
+                Pi += P
     
     C = (m * (n - 1))*P
     Qi = Q
@@ -168,7 +169,7 @@ def pohlig_hellman(P, Q, n, n_factors, dlog=bsgs):
 
             # Solve partial dlog
             dk = dlog(gamma, Qk, n, upper_bound=pi)
-            if not dk:
+            if dk is None:
                 print(f"Discrete log failed for {gamma=}, {Qk=}, {pi=}")
                 exit()
 
