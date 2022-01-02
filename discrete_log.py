@@ -46,7 +46,7 @@ def bsgs(P, Q, n, upper_bound=None, batched=False):
     else:
         m = ceil(sqrt(n))
 
-    if batched:
+    if not batched:
         if not hasattr(bsgs, 'baby_steps'):
             bsgs.baby_steps = dict()
             Pi = P.curve.O
