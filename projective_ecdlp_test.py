@@ -113,6 +113,6 @@ if __name__ == '__main__':
     # (15) 0.568s
     # (15) 1.574s
     # (1)  92.07s
-    test(easy, 1, dlog=bsgs, profile=True)
-    test(medium, 1, dlog=bsgs, profile=True)
+    test(easy, 20, dlog=bsgs, profile=True)
+    test(medium, 10, dlog=bsgs, profile=True)
     test(hard, 1, dlog=bsgs, profile=True)

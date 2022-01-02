@@ -159,6 +159,37 @@ def easy(profile=False):
     Q = Point(mpz(8282610078559603474288291323377077098), mpz(38703045175903081864811053665644938292))
     assert Q == double_and_add(P, d, curve)
 
+    check_times = 20
+    total_time = 0
+    for _ in range(check_times):
+        t = time.time()
+        _d = pohlig_hellman(P, Q, n_factors, curve, compress_points=True)
+        time_taken = time.time() - t
+        total_time += time_taken
+        assert _d == d
+
+    if check_times:
+        total_time /= check_times
+        print(f"dlog successfully found in: {total_time}s (Average of {check_times} computations)")
+
+    if profile:
+        import cProfile
+        cProfile.runctx('pohlig_hellman(P, Q, n_factors, curve)', {'P' : P, 'Q' : Q, 'n_factors' : n_factors, 'curve' : curve}, {'pohlig_hellman' : pohlig_hellman})
+
+def medium(profile=False):
+    curve = {
+    "p"  : mpz(98906321313648462858319284505234548427),
+    "a"  : mpz(32145787080282355644144967255667048727),
+    "b"  : mpz(89548250861913899611424618886487180071),
+    "n"  : mpz(98906321313648462861838792221717503570)
+    }
+
+    n_factors = [(2, 1), (5, 1), (79, 1), (149, 1), (331, 1), (829, 1), (14557, 1), (2952361, 1), (3841283, 1), (18548573663, 1)]
+    d = 61740216832614097604827460809608306308
+    P = Point(mpz(26117803474791015119012614892802916918), mpz(4572686300801370513052182829424865063))
+    Q = Point(mpz(3147167679804035091862248740947924832), mpz(56854158179379733482731991597760459393))
+    assert Q == double_and_add(P, d, curve)
+
     check_times = 10
     total_time = 0
     for _ in range(check_times):
@@ -168,15 +199,16 @@ def easy(profile=False):
         total_time += time_taken
         assert _d == d
 
-    total_time /= check_times
-    print(f"dlog successfully found in: {total_time}s (Average of {check_times} computations)")
+    if check_times:
+        total_time /= check_times
+        print(f"dlog successfully found in: {total_time}s (Average of {check_times} computations)")
 
     if profile:
         import cProfile
         cProfile.runctx('pohlig_hellman(P, Q, n_factors, curve)', {'P' : P, 'Q' : Q, 'n_factors' : n_factors, 'curve' : curve}, {'pohlig_hellman' : pohlig_hellman})
 
 
-def hard():
+def hard(profile=False):
     curve = {
         "p"  : mpz(115792089210356248762697446949407573530086143415290314195533631308867097853951),
         "a"  : mpz(115792089210356248762697446949407573530086143415290314195533631308867097853948),
@@ -198,11 +230,21 @@ def hard():
         time_taken = time.time() - t
         total_time += time_taken
         assert _d == d
-    total_time /= check_times
-    print(f"dlog successfully found in: {total_time}s (Average of {check_times} computations)")
+
+    if check_times:
+        total_time /= check_times
+        print(f"dlog successfully found in: {total_time}s (Average of {check_times} computations)")
+
+    if profile:
+        import cProfile
+        cProfile.runctx('pohlig_hellman(P, Q, n_factors, curve)', {'P' : P, 'Q' : Q, 'n_factors' : n_factors, 'curve' : curve}, {'pohlig_hellman' : pohlig_hellman})
+
 
 if __name__ == '__main__':
     easy(profile=True)
+    medium(profile=True)
+    hard(profile=True)
+
     # hard()
 
 

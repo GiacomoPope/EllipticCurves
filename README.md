@@ -12,7 +12,7 @@ Implementation of elliptic curve arithematic for fun, and for use of plugging in
 - Pairings (Which also means divisors)
 - More Benchmarks for point addion and scalar multiplication outside of dlog
 
-## Discrete Logarithm Benchmarks
+# Discrete Logarithm Benchmarks
 
 ### Easy Challenge
 
@@ -29,52 +29,6 @@ easy = {
     "n_factors": [(3, 2), (7, 1), (103, 1), (149, 1), (2927, 1), (11383, 1), (19147411, 1), (157025399, 1), (729196241, 1)],
     "d": 7925915577899419388989866332768730889,
 }
-```
-
-```shell
-dlog successfully found in: 0.5312049388885498s (Average of 1 computations)
-         1144631 function calls in 0.801 seconds
-
-   Ordered by: standard name
-
-   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-        1    0.000    0.000    0.800    0.800 <string>:1(<module>)
-     3079    0.009    0.000    0.012    0.000 curve.py:107(_double)
-       54    0.000    0.000    0.000    0.000 curve.py:128(_mdouble)
-        1    0.000    0.000    0.000    0.000 curve.py:51(_neg)
-     1511    0.004    0.000    0.005    0.000 curve.py:59(_add)
-    43637    0.138    0.000    0.156    0.000 curve.py:77(_madd)
-    14932    0.027    0.000    0.032    0.000 curve.py:92(_mmadd)
-        1    0.000    0.000    0.000    0.000 discrete_log.py:136(crt)
-        1    0.000    0.000    0.000    0.000 discrete_log.py:138(<listcomp>)
-        1    0.000    0.000    0.000    0.000 discrete_log.py:140(<listcomp>)
-        1    0.016    0.016    0.800    0.800 discrete_log.py:149(pohlig_hellman)
-       10    0.119    0.012    0.763    0.076 discrete_log.py:37(bsgs)
-    44539    0.078    0.000    0.079    0.000 discrete_log.py:6(normalise_queue)
-       55    0.002    0.000    0.032    0.001 point.py:100(__mul__)
-       55    0.000    0.000    0.032    0.001 point.py:118(__rmul__)
-    58602    0.028    0.000    0.126    0.000 point.py:121(__hash__)
-   107333    0.082    0.000    0.092    0.000 point.py:125(__eq__)
-   185184    0.030    0.000    0.030    0.000 point.py:16(is_inf)
-    58648    0.022    0.000    0.043    0.000 point.py:19(normalise_coordinates)
-    58602    0.035    0.000    0.088    0.000 point.py:37(to_tuple)
-        1    0.000    0.000    0.000    0.000 point.py:43(__neg__)
-    63292    0.097    0.000    0.382    0.000 point.py:49(__add__)
-    63214    0.025    0.000    0.025    0.000 point.py:5(__init__)
-    58586    0.022    0.000    0.375    0.000 point.py:89(__iadd__)
-        1    0.000    0.000    0.000    0.000 {built-in method _functools.reduce}
-        1    0.000    0.000    0.801    0.801 {built-in method builtins.exec}
-       19    0.000    0.000    0.000    0.000 {built-in method builtins.hasattr}
-    58602    0.011    0.000    0.011    0.000 {built-in method builtins.hash}
-   170680    0.016    0.000    0.016    0.000 {built-in method builtins.isinstance}
-    44539    0.005    0.000    0.005    0.000 {built-in method builtins.len}
-    21235    0.025    0.000    0.025    0.000 {built-in method builtins.pow}
-       10    0.000    0.000    0.000    0.000 {built-in method math.ceil}
-       10    0.000    0.000    0.000    0.000 {built-in method math.sqrt}
-    88193    0.010    0.000    0.010    0.000 {method 'append' of 'list' objects}
-        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
-
-
 ```
 
 ### Medium Challenge
@@ -94,8 +48,79 @@ medium = {
 }
 ```
 
+### Hard Challenge
+
+```py
+hard = {
+    "p": 115792089210356248762697446949407573530086143415290314195533631308867097853951,
+    "a": 115792089210356248762697446949407573530086143415290314195533631308867097853948,
+    "b": 87141810357877800334735859453509209467794565735898098218969231306558751088856,
+    "n": 5263276782288920398304429406791253342296478557414290806433459571651589156874,
+    "Px": 71240604556050345398966464559756938196778573228234842743790013676579385297801,
+    "Py": 60316620433133574305684204843273434175863163133594306844983613764544771974108,
+    "Qx": 73603178013615315024061584560815809619225082394444494033618196279075556997083,
+    "Qy": 63212696062746681459472418314686130004296932507725110671668786589609630338793,
+    "n_factors": [(2, 1), (11, 1), (103, 1), (9007, 1), (23251, 1), (2829341, 1), (12490680737, 1), (92928915967, 1), (390971098981, 1), (1056753725227, 1), (8173984130089, 1)],
+    "d": 3943544205328749264434177719074374035314915664326936412021520273127793155287,
+}
+```
+
+## Projective Coordinates
+
+- dlog successfully found in: 0.4872660517692566s (Average of 20 computations)
+- dlog successfully found in: 1.5874902725219726s (Average of 10 computations)
+- dlog successfully found in: 93.61399602890015s (Average of 1 computations)
+
+### Easy Challenge
+
 ```shell
-dlog successfully found in: 1.5418751239776611s (Average of 1 computations)
+dlog successfully found in: 0.4872660517692566s (Average of 20 computations)
+         1144631 function calls in 0.750 seconds
+
+   Ordered by: standard name
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.750    0.750 <string>:1(<module>)
+     3079    0.009    0.000    0.012    0.000 curve.py:107(_double)
+       54    0.000    0.000    0.000    0.000 curve.py:128(_mdouble)
+        1    0.000    0.000    0.000    0.000 curve.py:51(_neg)
+     1511    0.004    0.000    0.004    0.000 curve.py:59(_add)
+    43637    0.129    0.000    0.147    0.000 curve.py:77(_madd)
+    14932    0.027    0.000    0.032    0.000 curve.py:92(_mmadd)
+        1    0.000    0.000    0.000    0.000 discrete_log.py:136(crt)
+        1    0.000    0.000    0.000    0.000 discrete_log.py:138(<listcomp>)
+        1    0.000    0.000    0.000    0.000 discrete_log.py:140(<listcomp>)
+        1    0.016    0.016    0.750    0.750 discrete_log.py:149(pohlig_hellman)
+       10    0.104    0.010    0.714    0.071 discrete_log.py:37(bsgs)
+    44539    0.071    0.000    0.072    0.000 discrete_log.py:6(normalise_queue)
+       55    0.002    0.000    0.031    0.001 point.py:100(__mul__)
+       55    0.000    0.000    0.031    0.001 point.py:118(__rmul__)
+    58602    0.026    0.000    0.122    0.000 point.py:121(__hash__)
+   107333    0.077    0.000    0.086    0.000 point.py:125(__eq__)
+   185184    0.028    0.000    0.028    0.000 point.py:16(is_inf)
+    58648    0.022    0.000    0.045    0.000 point.py:19(normalise_coordinates)
+    58602    0.033    0.000    0.086    0.000 point.py:37(to_tuple)
+        1    0.000    0.000    0.000    0.000 point.py:43(__neg__)
+    63292    0.092    0.000    0.363    0.000 point.py:49(__add__)
+    63214    0.025    0.000    0.025    0.000 point.py:5(__init__)
+    58586    0.021    0.000    0.356    0.000 point.py:89(__iadd__)
+        1    0.000    0.000    0.000    0.000 {built-in method _functools.reduce}
+        1    0.000    0.000    0.750    0.750 {built-in method builtins.exec}
+       19    0.000    0.000    0.000    0.000 {built-in method builtins.hasattr}
+    58602    0.010    0.000    0.010    0.000 {built-in method builtins.hash}
+   170680    0.015    0.000    0.015    0.000 {built-in method builtins.isinstance}
+    44539    0.005    0.000    0.005    0.000 {built-in method builtins.len}
+    21235    0.026    0.000    0.026    0.000 {built-in method builtins.pow}
+       10    0.000    0.000    0.000    0.000 {built-in method math.ceil}
+       10    0.000    0.000    0.000    0.000 {built-in method math.sqrt}
+    88193    0.009    0.000    0.009    0.000 {method 'append' of 'list' objects}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+```
+
+### Medium Challenge
+
+```shell
+dlog successfully found in: 1.5874902725219726s (Average of 10 computations)
          3170998 function calls in 2.225 seconds
 
    Ordered by: standard name
@@ -138,21 +163,6 @@ dlog successfully found in: 1.5418751239776611s (Average of 1 computations)
 
 ### Hard Challenge
 
-```py
-hard = {
-    "p": 115792089210356248762697446949407573530086143415290314195533631308867097853951,
-    "a": 115792089210356248762697446949407573530086143415290314195533631308867097853948,
-    "b": 87141810357877800334735859453509209467794565735898098218969231306558751088856,
-    "n": 5263276782288920398304429406791253342296478557414290806433459571651589156874,
-    "Px": 71240604556050345398966464559756938196778573228234842743790013676579385297801,
-    "Py": 60316620433133574305684204843273434175863163133594306844983613764544771974108,
-    "Qx": 73603178013615315024061584560815809619225082394444494033618196279075556997083,
-    "Qy": 63212696062746681459472418314686130004296932507725110671668786589609630338793,
-    "n_factors": [(2, 1), (11, 1), (103, 1), (9007, 1), (23251, 1), (2829341, 1), (12490680737, 1), (92928915967, 1), (390971098981, 1), (1056753725227, 1), (8173984130089, 1)],
-    "d": 3943544205328749264434177719074374035314915664326936412021520273127793155287,
-}
-```
-
 ```shell
 dlog successfully found in: 93.61399602890015s (Average of 1 computations)
          134190329 function calls in 136.484 seconds
@@ -192,5 +202,103 @@ dlog successfully found in: 93.61399602890015s (Average of 1 computations)
        11    0.000    0.000    0.000    0.000 {built-in method math.ceil}
        11    0.000    0.000    0.000    0.000 {built-in method math.sqrt}
   9861657    1.534    0.000    1.534    0.000 {method 'append' of 'list' objects}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+```
+
+
+## Affine Coordinates
+
+- dlog successfully found in: 0.2927542686462402s (Average of 20 computations)
+- dlog successfully found in: 0.8004036188125611s (Average of 10 computations)
+- dlog successfully found in: 48.72581100463867s (Average of 1 computations)
+
+
+### Easy Challenge
+
+```shell
+dlog successfully found in: 0.2927542686462402s (Average of 20 computations)
+         444914 function calls in 0.369 seconds
+
+   Ordered by: standard name
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   127040    0.029    0.000    0.054    0.000 <string>:1(<lambda>)
+        1    0.000    0.000    0.369    0.369 <string>:1(<module>)
+        1    0.000    0.000    0.000    0.000 affine_ecdlp_test.py:100(<listcomp>)
+        1    0.000    0.000    0.000    0.000 affine_ecdlp_test.py:102(<listcomp>)
+        1    0.010    0.010    0.369    0.369 affine_ecdlp_test.py:110(pohlig_hellman)
+    63549    0.043    0.000    0.073    0.000 affine_ecdlp_test.py:19(point_inverse)
+    63671    0.133    0.000    0.328    0.000 affine_ecdlp_test.py:25(point_addition)
+       57    0.002    0.000    0.025    0.000 affine_ecdlp_test.py:45(double_and_add)
+       10    0.029    0.003    0.343    0.034 affine_ecdlp_test.py:66(bsgs)
+        1    0.000    0.000    0.000    0.000 affine_ecdlp_test.py:98(crt)
+   127040    0.025    0.000    0.025    0.000 {built-in method __new__ of type object at 0x10990a430}
+        1    0.000    0.000    0.369    0.369 {built-in method builtins.exec}
+       10    0.000    0.000    0.000    0.000 {built-in method builtins.hasattr}
+    63500    0.098    0.000    0.098    0.000 {built-in method builtins.pow}
+       10    0.000    0.000    0.000    0.000 {built-in method math.ceil}
+        1    0.000    0.000    0.000    0.000 {built-in method math.gcd}
+       10    0.000    0.000    0.000    0.000 {built-in method math.sqrt}
+        9    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+```
+
+### Medium Challenge
+
+```shell
+dlog successfully found in: 0.8004036188125611s (Average of 10 computations)
+         1164926 function calls in 1.040 seconds
+
+   Ordered by: standard name
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   332713    0.076    0.000    0.163    0.000 <string>:1(<lambda>)
+        1    0.000    0.000    1.040    1.040 <string>:1(<module>)
+        1    0.000    0.000    0.000    0.000 affine_ecdlp_test.py:100(<listcomp>)
+        1    0.000    0.000    0.000    0.000 affine_ecdlp_test.py:102(<listcomp>)
+        1    0.040    0.040    1.040    1.040 affine_ecdlp_test.py:110(pohlig_hellman)
+   166370    0.114    0.000    0.212    0.000 affine_ecdlp_test.py:19(point_inverse)
+   166656    0.362    0.000    0.910    0.000 affine_ecdlp_test.py:25(point_addition)
+       60    0.002    0.000    0.027    0.000 affine_ecdlp_test.py:45(double_and_add)
+       10    0.088    0.009    0.983    0.098 affine_ecdlp_test.py:66(bsgs)
+        1    0.000    0.000    0.000    0.000 affine_ecdlp_test.py:98(crt)
+   332713    0.087    0.000    0.087    0.000 {built-in method __new__ of type object at 0x10990a430}
+        1    0.000    0.000    1.040    1.040 {built-in method builtins.exec}
+       10    0.000    0.000    0.000    0.000 {built-in method builtins.hasattr}
+   166356    0.271    0.000    0.271    0.000 {built-in method builtins.pow}
+       10    0.000    0.000    0.000    0.000 {built-in method math.ceil}
+        1    0.000    0.000    0.000    0.000 {built-in method math.gcd}
+       10    0.000    0.000    0.000    0.000 {built-in method math.sqrt}
+       10    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+```
+
+### Hard Challenge
+
+```shell
+dlog successfully found in: 48.72581100463867s (Average of 1 computations)
+         51078262 function calls in 67.489 seconds
+
+   Ordered by: standard name
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+ 14593615    3.782    0.000   10.246    0.000 <string>:1(<lambda>)
+        1    0.000    0.000   67.489   67.489 <string>:1(<module>)
+        1    0.000    0.000    0.000    0.000 affine_ecdlp_test.py:100(<listcomp>)
+        1    0.000    0.000    0.000    0.000 affine_ecdlp_test.py:102(<listcomp>)
+        1    1.703    1.703   67.489   67.489 affine_ecdlp_test.py:110(pohlig_hellman)
+  7296816    5.566    0.000   12.504    0.000 affine_ecdlp_test.py:19(point_inverse)
+  7297273   21.456    0.000   59.306    0.000 affine_ecdlp_test.py:25(point_addition)
+       66    0.005    0.000    0.080    0.001 affine_ecdlp_test.py:45(double_and_add)
+       11    6.475    0.589   65.732    5.976 affine_ecdlp_test.py:66(bsgs)
+        1    0.000    0.000    0.000    0.000 affine_ecdlp_test.py:98(crt)
+ 14593615    6.465    0.000    6.465    0.000 {built-in method __new__ of type object at 0x10990a430}
+        1    0.000    0.000   67.489   67.489 {built-in method builtins.exec}
+       11    0.000    0.000    0.000    0.000 {built-in method builtins.hasattr}
+  7296814   22.037    0.000   22.037    0.000 {built-in method builtins.pow}
+       11    0.000    0.000    0.000    0.000 {built-in method math.ceil}
+        1    0.000    0.000    0.000    0.000 {built-in method math.gcd}
+       11    0.000    0.000    0.000    0.000 {built-in method math.sqrt}
+       11    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}
         1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
 ```
