@@ -40,31 +40,32 @@ def normalise_queue(queue):
     P.z = 0 if P.z == 0 else 1
     return queue
 
-def bsgs(P, Q, n, upper_bound=None):
+def bsgs(P, Q, n, upper_bound=None, batched=False):
     if upper_bound:
         m = ceil(sqrt(upper_bound))
     else:
         m = ceil(sqrt(n))
 
-    # if not hasattr(bsgs, 'baby_steps'):
-    #     bsgs.baby_steps = dict()
-    #     Pi = P.curve.O
-    #     for i in range(m):
-    #         bsgs.baby_steps[Pi] = i
-    #         Pi += P
-
-    if not hasattr(bsgs, 'baby_steps'):
-        bsgs.baby_steps = dict()
-        queue = []
-        Pi = P.curve.O
-        for i in range(m):
-            queue.append((i, Pi))
-            Pi += P
-            if len(queue) == m or len(queue) >= 500:
-                queue = normalise_queue(queue)
-                for j, Pj in queue:
-                    bsgs.baby_steps[Pj] = j
-                queue = []
+    if batched:
+        if not hasattr(bsgs, 'baby_steps'):
+            bsgs.baby_steps = dict()
+            Pi = P.curve.O
+            for i in range(m):
+                bsgs.baby_steps[Pi] = i
+                Pi += P
+    else:
+        if not hasattr(bsgs, 'baby_steps'):
+            bsgs.baby_steps = dict()
+            queue = []
+            Pi = P.curve.O
+            for i in range(m):
+                queue.append((i, Pi))
+                Pi += P
+                if len(queue) == m or len(queue) >= 500:
+                    queue = normalise_queue(queue)
+                    for j, Pj in queue:
+                        bsgs.baby_steps[Pj] = j
+                    queue = []
     
     C = (m * (n - 1))*P
     Qi = Q
@@ -167,9 +168,9 @@ def pohlig_hellman(P, Q, n, n_factors, dlog=bsgs):
 
             # Solve partial dlog
             dk = dlog(gamma, Qk, n, upper_bound=pi)
-            print(f"{dk=}")
             if not dk:
-                continue
+                print(f"Discrete log failed for {gamma=}, {Qk=}, {pi=}")
+                exit()
 
             # increment the secret
             xi += dk*(pi**k)
