@@ -3,55 +3,54 @@ from gmpy2 import mpz
 from collections import namedtuple
 import time
 
+# Create a simple Curve class to represent the elliptic curve.
+Curve = namedtuple("Curve", "p a b n")
+
 # Create a simple Point class to represent the affine points.
 Point = namedtuple("Point", "x y")
 
 # The point at infinity (origin for the group law).
-O = None
+O = Point(-1,-1)
 
-def check_point(P, curve):
-    p, a, b = curve["p"], curve["a"], curve["b"]
+def check_point(P, E):
     if P == O:
         return True
     else:
-        return (P.y**2 - (P.x**3 + a*P.x + b)) % p == 0 and 0 <= P.x < p and 0 <= P.y < p
+        return (P.y**2 - (P.x**3 + E.a*P.x + E.b)) % E.p == 0 and 0 <= P.x < E.p and 0 <= P.y < E.p
 
-def point_inverse(P, curve):
-    p = curve["p"]
-    if (P == O or P.y == p or P.y == 0):
+def point_inverse(P, E):
+    if (P == O or P.y == E.p or P.y == 0):
         return P
-    return Point(P.x, p - P.y)
+    return Point(P.x, E.p - P.y)
 
-def point_addition(P, Q, curve):
-    p, a, b = curve["p"], curve["a"], curve["b"]
+def point_addition(P, Q, E):
     if P == O:
         return Q
     elif Q == O:
         return P
-    elif Q == point_inverse(P, curve):
+    elif Q == point_inverse(P, E):
         return O
     else:
         if P == Q:
-            lam = (3*P.x**2 + a)*pow(2*P.y, -1, p)
-            lam %= p
+            lam = (3*P.x**2 + E.a)*pow(2*P.y, -1, E.p)
+            lam %= E.p
         else:
-            lam = (Q.y - P.y) * pow((Q.x - P.x), -1, p)
-            lam %= p
-    Rx = (lam**2 - P.x - Q.x) % p
-    Ry = (lam*(P.x - Rx) - P.y) % p
-    R = Point(Rx, Ry)
-    return R
+            lam = (Q.y - P.y) * pow((Q.x - P.x), -1, E.p)
+            lam %= E.p
+    Rx = (lam**2 - P.x - Q.x) % E.p
+    Ry = (lam*(P.x - Rx) - P.y) % E.p
+    return Point(Rx, Ry)
 
-def double_and_add(P, n, curve):
+def double_and_add(P, n, E):
     if n < 0:
         n = -n
-        P = point_inverse(P, curve)
+        P = point_inverse(P, E)
     Q = P
     R = O
     while n > 0:
         if n % 2 == 1:
-            R = point_addition(R, Q, curve)
-        Q = point_addition(Q, Q, curve)
+            R = point_addition(R, Q, E)
+        Q = point_addition(Q, Q, E)
         n = n // 2
     return R
 
@@ -63,35 +62,31 @@ def compress(P):
     bytes_y = bytes([2 | ybit])
     return bytes_y + bytes_x
 
-def bsgs(P, Q, curve, upper_bound=None, compress_points=False):
+def bsgs(P, Q, E, upper_bound=None):
     if upper_bound:
         m = ceil(sqrt(upper_bound))
     else:
-        m = ceil(sqrt(curve["n"]))
+        m = ceil(sqrt(E.n))
 
     if not hasattr(bsgs, 'baby_steps'):
         bsgs.baby_steps = dict()
         Pi = O
-        for i in range(m):
-            if compress_points:
-                Pc = compress(Pi)
-                bsgs.baby_steps[Pc] = i
-            else:
-                bsgs.baby_steps[Pi] = i
-            Pi = point_addition(Pi, P, curve)
+        for i in range(m//2 + 1):
+            bsgs.baby_steps[Pi.x] = i
+            Pi = point_addition(Pi, P, E)
     
-    C = double_and_add(P, m * (curve["n"] - 1), curve)
+    C = double_and_add(P, -m, E)
     Qi = Q
 
     # giant steps
     for j in range(m):
-        if compress_points:
-            Qc = compress(Qi)
-        else:
-            Qc = Qi
-        if Qc in bsgs.baby_steps:
-            return j * m + bsgs.baby_steps[Qc]
-        Qi = point_addition(Qi, C, curve)
+        if Qi.x in bsgs.baby_steps:
+            x = j * m + bsgs.baby_steps[Qi.x]
+            if Q == double_and_add(P, x, E):
+                return x
+            else:
+                return j * m - bsgs.baby_steps[Qi.x]
+        Qi = point_addition(Qi, C, E)
     # No solution
     return None
 
@@ -107,30 +102,30 @@ def crt(xs, ns_fac, n):
         x += xi * yi * zi
     return x % n
 
-def pohlig_hellman(P, Q, n_factors, curve, compress_points=False):
-    n = curve["n"]
+def pohlig_hellman(P, Q, n_factors, E):
     dlogs = []
     for pi, ei in n_factors:
         # Set up for each step
         ni = pi**ei
-        tmp = n // ni
-        Pi = double_and_add(P, tmp, curve)
-        Qi = double_and_add(Q, tmp, curve)
+        tmp = E.n // ni
+        Pi = double_and_add(P, tmp, E)
+        Qi = double_and_add(Q, tmp, E)
 
         # Groups of prime-power order
         xi = 0
         Qk_mul = ni // pi
-        gamma = double_and_add(Pi, Qk_mul, curve)
+        gamma = double_and_add(Pi, Qk_mul, E)
 
         for k in range(ei):
             # Create hk in <γ>
-            Pk = double_and_add(Pi, -xi, curve)
-            PkQi = point_addition(Pk, Qi, curve)
-            Qk = double_and_add(PkQi, Qk_mul, curve)
+            Pk = double_and_add(Pi, -xi, E)
+            PkQi = point_addition(Pk, Qi, E)
+            Qk = double_and_add(PkQi, Qk_mul, E)
 
             # Solve partial dlog
-            dk = bsgs(gamma, Qk, curve, upper_bound=pi, compress_points=compress_points)
+            dk = bsgs(gamma, Qk, E, upper_bound=pi)
             if dk == None:
+                print(gamma, Qk)
                 exit(f"No solution found for {pi=}, {k=}")
 
             # increment the secret
@@ -141,99 +136,21 @@ def pohlig_hellman(P, Q, n_factors, curve, compress_points=False):
         
         del bsgs.baby_steps
         dlogs.append(xi)
-    return crt(dlogs, n_factors, n)
+    return crt(dlogs, n_factors, E.n)
 
-
-
-def easy(profile=False):
-    curve = {
-    "p"  : mpz(70626532935755249535015847300547144123),
-    "a"  : mpz(53846105384463287779700510485213602312),
-    "b"  : mpz(39488034705498452275235901953079958630),
-    "n"  : mpz(70626532935755249533534472952715229049)
-    }
-
-    n_factors = [(3, 2), (7, 1), (103, 1), (149, 1), (2927, 1), (11383, 1), (19147411, 1), (157025399, 1), (729196241, 1)]
-    d = 7925915577899419388989866332768730889
-    P = Point(mpz(11485778132722977526438273953657454892), mpz(55353233819247962030145200182101892228))
-    Q = Point(mpz(8282610078559603474288291323377077098), mpz(38703045175903081864811053665644938292))
-    assert Q == double_and_add(P, d, curve)
-
-    check_times = 20
+def benchmark(challenge, check_times=10, profile=False):
+    E, P, Q, d, n_factors = challenge
+    assert Q == double_and_add(P, d, E)
     total_time = 0
     for _ in range(check_times):
         t = time.time()
-        _d = pohlig_hellman(P, Q, n_factors, curve, compress_points=True)
+        _d = pohlig_hellman(P, Q, n_factors, E)
         time_taken = time.time() - t
         total_time += time_taken
         assert _d == d
 
-    if check_times:
-        total_time /= check_times
-        print(f"dlog successfully found in: {total_time}s (Average of {check_times} computations)")
-
-    if profile:
-        import cProfile
-        cProfile.runctx('pohlig_hellman(P, Q, n_factors, curve)', {'P' : P, 'Q' : Q, 'n_factors' : n_factors, 'curve' : curve}, {'pohlig_hellman' : pohlig_hellman})
-
-def medium(profile=False):
-    curve = {
-    "p"  : mpz(98906321313648462858319284505234548427),
-    "a"  : mpz(32145787080282355644144967255667048727),
-    "b"  : mpz(89548250861913899611424618886487180071),
-    "n"  : mpz(98906321313648462861838792221717503570)
-    }
-
-    n_factors = [(2, 1), (5, 1), (79, 1), (149, 1), (331, 1), (829, 1), (14557, 1), (2952361, 1), (3841283, 1), (18548573663, 1)]
-    d = 61740216832614097604827460809608306308
-    P = Point(mpz(26117803474791015119012614892802916918), mpz(4572686300801370513052182829424865063))
-    Q = Point(mpz(3147167679804035091862248740947924832), mpz(56854158179379733482731991597760459393))
-    assert Q == double_and_add(P, d, curve)
-
-    check_times = 10
-    total_time = 0
-    for _ in range(check_times):
-        t = time.time()
-        _d = pohlig_hellman(P, Q, n_factors, curve, compress_points=True)
-        time_taken = time.time() - t
-        total_time += time_taken
-        assert _d == d
-
-    if check_times:
-        total_time /= check_times
-        print(f"dlog successfully found in: {total_time}s (Average of {check_times} computations)")
-
-    if profile:
-        import cProfile
-        cProfile.runctx('pohlig_hellman(P, Q, n_factors, curve)', {'P' : P, 'Q' : Q, 'n_factors' : n_factors, 'curve' : curve}, {'pohlig_hellman' : pohlig_hellman})
-
-
-def hard(profile=False):
-    curve = {
-        "p"  : mpz(115792089210356248762697446949407573530086143415290314195533631308867097853951),
-        "a"  : mpz(115792089210356248762697446949407573530086143415290314195533631308867097853948),
-        "b"  : mpz(87141810357877800334735859453509209467794565735898098218969231306558751088856),
-        "n"  : mpz(5263276782288920398304429406791253342296478557414290806433459571651589156874)
-    }
-
-    n_factors = [(2, 1), (11, 1), (103, 1), (9007, 1), (23251, 1), (2829341, 1), (12490680737, 1), (92928915967, 1), (390971098981, 1), (1056753725227, 1), (8173984130089, 1)]
-    d = 3943544205328749264434177719074374035314915664326936412021520273127793155287
-    P = Point(mpz(71240604556050345398966464559756938196778573228234842743790013676579385297801), mpz(60316620433133574305684204843273434175863163133594306844983613764544771974108))
-    Q = Point(mpz(73603178013615315024061584560815809619225082394444494033618196279075556997083), mpz(63212696062746681459472418314686130004296932507725110671668786589609630338793))
-    assert Q == double_and_add(P, d, curve)
-
-    check_times = 1
-    total_time = 0
-    for _ in range(check_times):
-        t = time.time()
-        _d = pohlig_hellman(P, Q, n_factors, curve, compress_points=True)
-        time_taken = time.time() - t
-        total_time += time_taken
-        assert _d == d
-
-    if check_times:
-        total_time /= check_times
-        print(f"dlog successfully found in: {total_time}s (Average of {check_times} computations)")
+    total_time /= check_times
+    print(f"dlog successfully found in: {total_time}s (Average of {check_times} computations)")
 
     if profile:
         import cProfile
@@ -241,10 +158,72 @@ def hard(profile=False):
 
 
 if __name__ == '__main__':
-    easy(profile=True)
-    medium(profile=True)
-    hard(profile=True)
+    easy_chal = (
+        Curve(
+            mpz(70626532935755249535015847300547144123),
+            mpz(53846105384463287779700510485213602312),
+            mpz(39488034705498452275235901953079958630),
+            mpz(70626532935755249533534472952715229049)
+        ),
+        Point(
+            mpz(11485778132722977526438273953657454892), 
+            mpz(55353233819247962030145200182101892228)
+        ),
+        Point(
+            mpz(8282610078559603474288291323377077098), 
+            mpz(38703045175903081864811053665644938292)
+        ),
+        7925915577899419388989866332768730889,
+        [(3, 2), (7, 1), (103, 1), (149, 1), (2927, 1), (11383, 1), (19147411, 1), (157025399, 1), (729196241, 1)]
+    )
 
-    # hard()
+    medium_chal = (
+        Curve(
+            mpz(98906321313648462858319284505234548427),
+            mpz(32145787080282355644144967255667048727),
+            mpz(89548250861913899611424618886487180071),
+            mpz(98906321313648462861838792221717503570)
+        ),
+        Point(
+            mpz(26117803474791015119012614892802916918), 
+            mpz(4572686300801370513052182829424865063)
+        ),
+        Point(
+            mpz(3147167679804035091862248740947924832), 
+            mpz(56854158179379733482731991597760459393)
+        ),
+        61740216832614097604827460809608306308,
+        [(2, 1), (5, 1), (79, 1), (149, 1), (331, 1), (829, 1), (14557, 1), (2952361, 1), (3841283, 1), (18548573663, 1)]
+    )
 
+    hard_chal = (
+        Curve(
+            mpz(115792089210356248762697446949407573530086143415290314195533631308867097853951),
+            mpz(115792089210356248762697446949407573530086143415290314195533631308867097853948),
+            mpz(87141810357877800334735859453509209467794565735898098218969231306558751088856),
+            mpz(5263276782288920398304429406791253342296478557414290806433459571651589156874)
+        ),
+        Point(
+            mpz(71240604556050345398966464559756938196778573228234842743790013676579385297801), 
+            mpz(60316620433133574305684204843273434175863163133594306844983613764544771974108)
+        ),
+        Point(
+            mpz(73603178013615315024061584560815809619225082394444494033618196279075556997083), 
+            mpz(63212696062746681459472418314686130004296932507725110671668786589609630338793)
+        ),
+        3943544205328749264434177719074374035314915664326936412021520273127793155287,
+        [(2, 1), (11, 1), (103, 1), (9007, 1), (23251, 1), (2829341, 1), (12490680737, 1), (92928915967, 1), (390971098981, 1), (1056753725227, 1), (8173984130089, 1)]
+    )
 
+    benchmark(easy_chal, check_times=20)
+    benchmark(medium_chal)
+    benchmark(hard_chal, check_times=1)
+
+    
+    
+"""
+➜  Desktop python bsgs.py
+dlog successfully found in: 0.16169570684432982s (Average of 20 computations)
+dlog successfully found in: 0.4032686948776245s (Average of 10 computations)
+dlog successfully found in: 28.050325632095337s (Average of 1 computations)
+"""
